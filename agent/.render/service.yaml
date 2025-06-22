@@ -8,6 +8,8 @@ services:
     startCommand: "python main.py"
     rootDir: backend
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
       - key: OPENAI_API_KEY
         sync: false
       - key: AGORA_APP_ID
