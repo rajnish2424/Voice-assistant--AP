@@ -1,8 +1,0 @@
-openai
-langchain
-faiss-cpu
-whisper
-coqui-ai
-gspread
-oauth2client
-python-dotenv
