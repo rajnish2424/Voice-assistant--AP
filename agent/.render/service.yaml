@@ -9,14 +9,14 @@ services:
     rootDir: backend
     envVars:
       - key: OPENAI_API_KEY
-        value: your-openai-key
+        sync: false
       - key: AGORA_APP_ID
-        value: your-agora-app-id
+        sync: false
       - key: AGORA_APP_CERTIFICATE
-        value: your-agora-app-certificate
+        sync: false
       - key: GOOGLE_SHEET_ID
-        value: your-google-sheet-id
+        sync: false
       - key: GOOGLE_CREDENTIALS_JSON
-        value: '{"type": "...", "project_id": "..."}'
+        sync: false
       - key: GITHUB_KB_REPO
         value: rajnish2424/Voice-assistant--AP
