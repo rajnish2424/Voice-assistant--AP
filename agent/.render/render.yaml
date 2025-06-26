@@ -1,0 +1,9 @@
+services:
+  - type: static
+    name: voice-agent-frontend
+    env: static
+    buildCommand: npm run build
+    staticPublishPath: dist
+    rootDir: frontend
+    branch: main  # or the branch you're deploying from
+    autoDeploy: true
