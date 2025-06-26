@@ -6,11 +6,11 @@ import os
 app = FastAPI()
 
 @app.get("/")
-def read_root():
+def health_check():
     return {"message": "Voice Agent Backend is running!"}
 
 class CallRequest(BaseModel):
-    customer_id: str
+    phone_number: str
     language: str = "english"
 
 @app.post("/start-call")
@@ -19,18 +19,22 @@ def start_call(request: CallRequest):
         sheet = get_sheet()
         all_records = sheet.get_all_records()
 
-        # Find the customer row
-        matched = next((row for row in all_records if str(row.get("CustomerID")) == request.customer_id), None)
-        if not matched:
-            return {"error": "Customer not found"}
+        # Find the client by phone number
+        matched = next(
+            (row for row in all_records if str(row.get("Phone")) == request.phone_number),
+            None
+        )
 
-        # Placeholder logic to trigger call
+        if not matched:
+            return {"status": "not_found", "message": "Phone number not found in sheet."}
+
+        # Placeholder: You can trigger Agora/Coqui logic here
         return {
-            "status": "call triggered",
-            "customer_id": request.customer_id,
-            "language": request.language,
-            "customer_name": matched.get("Name", "Unknown")
+            "status": "call_triggered",
+            "customer_name": matched.get("Name", "Unknown"),
+            "phone": request.phone_number,
+            "language": request.language
         }
 
     except Exception as e:
-        return {"error": str(e)}
+        return {"status": "error", "message": str(e)}
