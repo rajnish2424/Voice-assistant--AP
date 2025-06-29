@@ -1,9 +1,23 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 from google_sheets import get_sheet
 import os
 
-app = FastAPI()
+app = FastAPI(
+    title="Voice Agent API",
+    description="Handles customer callbacks using Google Sheets + Voice APIs.",
+    version="0.1.0"
+)
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, set to your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def health_check():
