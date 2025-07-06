@@ -11,3 +11,4 @@ uvicorn
 pydantic
 gspread
 oauth2client
+supabase
