@@ -1,21 +1,34 @@
-import gspread
-import json
 import os
-from oauth2client.service_account import ServiceAccountCredentials
+import json
+import gspread
+from google.oauth2.service_account import Credentials
 
 def get_sheet():
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-    if not creds_json:
-        raise Exception("Missing GOOGLE_CREDENTIALS_JSON env var")
+    #Step 1: Load the credentials from environment variable
+    raw_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
 
-    creds_dict = json.loads(creds_json)
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    if not raw_json:
+        raise ValueError("❌ GOOGLE_CREDENTIALS_JSON not found in environment variables.")
 
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-    client = gspread.authorize(creds)
+    try:
+        #Step 2: Parse the escaped JSON string
+        parsed_credentials = json.loads(raw_json)
 
-    sheet_id = os.environ.get("GOOGLE_SHEET_ID")
-    if not sheet_id:
-        raise Exception("Missing GOOGLE_SHEET_ID env var")
+        #Step 3: Authenticate using the parsed credentials
+        scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+        creds = Credentials.from_service_account_info(parsed_credentials, scopes=scopes)
 
-    return client.open_by_key(sheet_id).sheet1
+        #Step 4: Connect to Google Sheets
+        client = gspread.authorize(creds)
+
+        #Step 5: Open the sheet by ID
+        sheet_id = os.getenv("GOOGLE_SHEET_ID")
+        if not sheet_id:
+            raise ValueError("❌ GOOGLE_SHEET_ID not found in environment variables.")
+
+        spreadsheet = client.open_by_key(sheet_id)
+        worksheet = spreadsheet.sheet1  # or use .worksheet('Sheet1') if you named it
+        return worksheet
+
+    except Exception as e:
+        raise RuntimeError(f"❌ Failed to connect to Google Sheets: {str(e)}")
