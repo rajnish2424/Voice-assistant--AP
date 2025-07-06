@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from google_sheets import get_sheet
+from supabase_client import get_clients
 import os
 
 app = FastAPI(
@@ -27,25 +27,25 @@ class CallRequest(BaseModel):
     phone_number: str
     language: str = "english"
 
+
 @app.post("/start-call")
 def start_call(request: CallRequest):
     try:
-        sheet = get_sheet()
-        all_records = sheet.get_all_records()
+        all_records = get_clients()
 
         # Find the client by phone number
         matched = next(
-            (row for row in all_records if str(row.get("Phone")) == request.phone_number),
+            (row for row in all_records if str(row.get("phone")) == request.phone_number),
             None
         )
 
         if not matched:
-            return {"status": "not_found", "message": "Phone number not found in sheet."}
+            return {"status": "not_found", "message": "Phone number not found in database."}
 
-        # Placeholder: You can trigger Agora/Coqui logic here
+        # Trigger voice agent logic here if match is found
         return {
             "status": "call_triggered",
-            "customer_name": matched.get("Name", "Unknown"),
+            "customer_name": matched.get("name", "Unknown"),
             "phone": request.phone_number,
             "language": request.language
         }
