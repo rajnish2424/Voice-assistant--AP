@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from supabase_client import get_clients
+from voice_engine import generate_response_audio, call_via_agora
 import os
+
 
 app = FastAPI(
     title="Voice Agent API",
@@ -42,12 +44,19 @@ def start_call(request: CallRequest):
         if not matched:
             return {"status": "not_found", "message": "Phone number not found in database."}
 
-        # Trigger voice agent logic here if match is found
+       # 🎤 1. Generate voice message
+        message = f"Hello {matched.get('name', 'there')}, we noticed your monthly expenses have dropped. Would you like to speak with an advisor?"
+        audio_file_path = generate_response_audio(message)
+
+        # 📞 2. Placeholder Agora voice call trigger
+        call_triggered = call_via_agora(request.phone_number, audio_file_path)
+
         return {
-            "status": "call_triggered",
+            "status": "call_triggered" if call_triggered else "call_failed",
             "customer_name": matched.get("name", "Unknown"),
             "phone": request.phone_number,
-            "language": request.language
+            "language": request.language,
+            "audio_file": audio_file_path
         }
 
     except Exception as e:
