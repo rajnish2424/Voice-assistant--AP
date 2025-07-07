@@ -1,9 +1,18 @@
 services:
+  - type: web
+    name: voice-agent-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    plan: free
+    rootDir: agent/backend
+    autoDeploy: true
+
   - type: static
     name: voice-agent-frontend
     env: static
     buildCommand: npm run build
     staticPublishPath: dist
-    rootDir: frontend
-    branch: main  # or the branch you're deploying from
+    rootDir: agent/frontend
+    branch: main
     autoDeploy: true
