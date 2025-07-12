@@ -5,17 +5,16 @@ from supabase_client import get_clients
 from voice_engine import generate_response_audio, call_via_agora
 import os
 
-
 app = FastAPI(
     title="Voice Agent API",
-    description="Handles customer callbacks using Google Sheets + Voice APIs.",
+    description="Handles customer callbacks using Supabase + Voice APIs.",
     version="0.1.0"
 )
 
-# Enable CORS
+# ✅ Enable CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, set to your frontend domain
+    allow_origins=["*"],  # In production, restrict to frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,13 +28,12 @@ class CallRequest(BaseModel):
     phone_number: str
     language: str = "english"
 
-
 @app.post("/start-call")
 def start_call(request: CallRequest):
     try:
         all_records = get_clients()
 
-        # Find the client by phone number
+        # 🔍 Find the client by phone number
         matched = next(
             (row for row in all_records if str(row.get("phone")) == request.phone_number),
             None
@@ -44,11 +42,16 @@ def start_call(request: CallRequest):
         if not matched:
             return {"status": "not_found", "message": "Phone number not found in database."}
 
-       # 🎤 1. Generate voice message
-        message = f"Hello {matched.get('name', 'there')}, we noticed your monthly expenses have dropped. Would you like to speak with an advisor?"
-        audio_file_path = generate_response_audio(message)
+        # 🗣 Generate message based on language
+        if request.language.lower() == "hindi":
+            message = f"नमस्ते {matched.get('name', 'ग्राहक')}, हमने देखा कि इस महीने आपके खर्च कम हो गए हैं। क्या आप सलाहकार से बात करना चाहेंगे?"
+        else:
+            message = f"Hello {matched.get('name', 'there')}, we noticed your monthly expenses have dropped. Would you like to speak with an advisor?"
 
-        # 📞 2. Placeholder Agora voice call trigger
+        # 🔊 Generate voice audio
+        audio_file_path = generate_response_audio(message, language=request.language)
+
+        # 📞 Trigger voice call (stub for now)
         call_triggered = call_via_agora(request.phone_number, audio_file_path)
 
         return {
@@ -62,7 +65,7 @@ def start_call(request: CallRequest):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# ✅ Start FastAPI with uvicorn so Render can detect the port
+# ✅ For Render deployment: ensure Uvicorn starts from this file
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
