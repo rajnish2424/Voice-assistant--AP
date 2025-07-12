@@ -9,6 +9,4 @@ python-dotenv
 fastapi
 uvicorn
 pydantic
-gspread
-oauth2client
-supabase
+supabase-py
